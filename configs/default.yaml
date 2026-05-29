@@ -1,0 +1,45 @@
+data:
+  input_dir: "artifacts/data/raw"
+  puzzle_dir: "artifacts/data/puzzles"
+  max_images: 10
+  resize_long_edge: 512
+
+puzzle:
+  grid_rows: 4
+  grid_cols: 4
+  allow_rotations: true
+  rotation_angles: [0, 90, 180, 270]
+  border_width: 6
+  seed: 42
+
+features:
+  color:
+    enabled: true
+    color_space: "rgb"
+    bins: 16
+  texture:
+    enabled: true
+  local:
+    enabled: false
+  deep:
+    enabled: true
+    backbone: "resnet18"
+    layer: "avgpool"
+
+adjacency:
+  distance: "euclidean"
+  similarity: "gaussian"
+  lambda: 1.0
+  family_weights:
+    color: 1.0
+    texture: 0.7
+    deep: 1.2
+    local: 0.4
+
+solver:
+  method: "local_search"
+  restarts: 4
+  iterations: 600
+
+evaluation:
+  output_dir: "artifacts/runs/default"

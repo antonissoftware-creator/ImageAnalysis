@@ -1,0 +1,45 @@
+# Python caches and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+.pdf-venv/
+venv/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# OS/editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Exclude planning/reference docs from repo history
+docs/
+
+# Keep only raw input images under artifacts
+artifacts/*
+!artifacts/data/
+artifacts/data/*
+!artifacts/data/raw/
+!artifacts/data/raw/**
+
+# Local env files
+.env
+.env.*
