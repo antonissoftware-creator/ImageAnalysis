@@ -19,10 +19,91 @@ from image_analysis.data.loaders import list_puzzle_dirs
 # YAML config loader.
 from image_analysis.utils.io import load_yaml
 
+
+# Inject custom CSS for right-aligned instant tooltips.
+st.markdown(
+    """
+<style>
+.step-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0.25rem 0 0.5rem 0;
+}
+.step-header-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+}
+.step-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-tooltip-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  background: #eef2ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  cursor: help;
+  user-select: none;
+}
+.step-tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0s linear;
+  position: absolute;
+  right: 0;
+  top: 22px;
+  z-index: 9999;
+  width: 360px;
+  max-width: min(360px, 90vw);
+  background: #111827;
+  color: #f9fafb;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.step-tooltip-wrap:hover .step-tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+# Render a step header with a tooltip-style info icon.
+def step_header(title: str, help_text: str) -> None:
+    # Draw a full-width row with title on left and icon at far right.
+    st.markdown(
+        f"<div class='step-header-row'>"
+        f"  <div class='step-header-title'>{title}</div>"
+        f"  <div class='step-tooltip-wrap'>"
+        f"    <span class='step-tooltip-icon'>!</span>"
+        f"    <div class='step-tooltip-text'>{help_text}</div>"
+        f"  </div>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
 # Configure Streamlit page metadata and layout.
 st.set_page_config(page_title="Lost in Pieces Demo", layout="wide")
 # Render page title.
-st.title("Lost in Pieces - Interactive Reconstruction Demo (D3)")
+st.title("Lost in Pieces - Interactive Reconstruction Demo")
 
 # Resolve default config path.
 cfg_path = Path("configs/default.yaml")
@@ -43,8 +124,11 @@ if not puzzle_dirs:
     st.warning("No puzzles found. Run: image-analysis make-puzzles")
     st.stop()
 
-# Render setup section header.
-st.subheader("1) Setup")
+# Render setup section header with tooltip.
+step_header(
+    "1) Setup",
+    "Choose puzzle, variant, and solver settings. Used before Run Reconstruction starts. Not a compute stage by itself.",
+)
 # Create setup control columns.
 col1, col2, col3 = st.columns(3)
 
@@ -76,8 +160,11 @@ d3_root = Path("artifacts/runs/d3")
 # Define legacy run root used by CLI experiments.
 legacy_root = Path(base_cfg["evaluation"]["output_dir"])
 
-# Render existing-run section header.
-st.subheader("2) Load Existing")
+# Render existing-run section header with tooltip.
+step_header(
+    "2) Load Existing",
+    "Loads prior artifacts from disk when available. Used directly in Cached mode, and as fallback in Hybrid mode.",
+)
 # Search D3 runs first.
 existing = find_existing_runs(d3_root, puzzle_name=puzzle_name, variant=variant)
 # Fallback to legacy runs if no D3 runs found.
@@ -92,8 +179,11 @@ else:
     selected_existing = None
     st.info("No existing run found for this puzzle/variant.")
 
-# Render run section header.
-st.subheader("3) Run")
+# Render run section header with tooltip.
+step_header(
+    "3) Run",
+    "Triggers full pipeline execution when clicked and mode allows live runs. In Cached-only mode, no live compute is triggered.",
+)
 # Render action button for live execution.
 run_clicked = st.button("Run Reconstruction")
 
@@ -113,8 +203,11 @@ stage_durations = None
 
 # Execute live run when user clicked and mode allows it.
 if run_clicked and live_allowed:
-    # Render process section header.
-    st.subheader("4) Process")
+    # Render process section header with tooltip.
+    step_header(
+        "4) Process",
+        "Live execution stages run here: extract features, build compatibility, solve, evaluate, and save outputs.",
+    )
     # Reserve status placeholder.
     stage_box = st.empty()
 
@@ -188,8 +281,11 @@ if run_dir is not None and metrics is None:
 
 # Render results section when metrics are available.
 if metrics is not None:
-    # Render results section header.
-    st.subheader("5) Results")
+    # Render results section header with tooltip.
+    step_header(
+        "5) Results",
+        "Displays metrics and qualitative images from either a live run or loaded cached artifacts.",
+    )
     # Create metric card columns.
     m1, m2, m3, m4 = st.columns(4)
     # Show piece-placement accuracy card.
@@ -217,8 +313,11 @@ if metrics is not None:
         if mismatch_path is not None and mismatch_path.exists():
             st.image(str(mismatch_path), caption="Mismatch Overlay")
 
-# Render artifact export section header.
-st.subheader("6) Artifacts")
+# Render artifact export section header with tooltip.
+step_header(
+    "6) Artifacts",
+    "Shows run folder path and lets you download JSON artifacts. Populated after live run or cached run load.",
+)
 # Render export controls when a run folder is selected/produced.
 if run_dir is not None:
     # Show run directory path.
